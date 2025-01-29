@@ -11,28 +11,28 @@ E = F = 14 # output map height and width
 
 def create_arrays() -> Tuple[List[List[List[List[float]]]]]:
     """Creates the input maps and the filter maps"""
-    inputMaps = [[[[[] for itr4 in range(H)] for itr3 in range(W)] for itr2 in range(C)] for itr1 in range(N)]
+    inputMaps = [[[[0 for itr4 in range(H)] for itr3 in range(W)] for itr2 in range(C)] for itr1 in range(N)]
     helper = [1, -1]
-    filterWeights = [[[[[] for itr4 in range(R)] for itr3 in range(S)] for itr2 in range(C)] for itr1 in range(M)]
+    filterWeights = [[[[0 for itr4 in range(R)] for itr3 in range(S)] for itr2 in range(C)] for itr1 in range(M)]
     for itr1 in range(N):
         for itr2 in range(C):
             for itr3 in range(W):
                 for itr4 in range(H):
                     rand = random.random()
                     multiplier = random.choice(helper)
-                    inputMaps[itr1][itr2][itr3][itr4].append(rand*multiplier)
+                    inputMaps[itr1][itr2][itr3][itr4] = (rand*multiplier)
     for itr1 in range(M):
         for itr2 in range(C):
             for itr3 in range(S):
                 for itr4 in range(R):
                     rand = random.random()
                     multiplier = random.choice(helper)
-                    filterWeights[itr1][itr2][itr3][itr4].append(rand*multiplier)
+                    filterWeights[itr1][itr2][itr3][itr4] = (rand*multiplier)
     return inputMaps, filterWeights
 
 def naiveConvolution(inputMaps: List[List[List[List[float]]]], filterWeights: List[List[List[List[float]]]]) -> List[List[List[List[float]]]]:
     """Performs a naive convolution given the input maps and the filter weights"""
-    outputMapsNaive = [[[[[0] for itr4 in range(E)] for itr3 in range(F)] for itr2 in range(M)] for itr1 in range(N)]
+    outputMapsNaive = [[[[0 for itr4 in range(E)] for itr3 in range(F)] for itr2 in range(M)] for itr1 in range(N)]
     for n in range(N):
         for m in range(M):
             for x in range(F):
@@ -40,7 +40,7 @@ def naiveConvolution(inputMaps: List[List[List[List[float]]]], filterWeights: Li
                     for i in range(R):
                         for j in range(S):
                             for k in range(C):
-                                outputMapsNaive[n][m][x][y][0] += inputMaps[n][k][U*x + i][U*y + j][0] * filterWeights[m][k][i][j][0]
+                                outputMapsNaive[n][m][x][y] += inputMaps[n][k][U*x + i][U*y + j] * filterWeights[m][k][i][j]
     return outputMapsNaive
 
 def filterWeightstoToeplitz(filterWeights: List[List[List[List[float]]]]) -> List[List[float]]:
@@ -52,7 +52,7 @@ def filterWeightstoToeplitz(filterWeights: List[List[List[List[float]]]]) -> Lis
         for i in range(R):
             for j in range(S):
                 for k in range(C):
-                    temp[R*S*k + innerCtr] = filterWeights[m][k][i][j][0]
+                    temp[R*S*k + innerCtr] = filterWeights[m][k][i][j]
                 innerCtr += 1
         filterWeightsforToeplitz[m] = temp
     return filterWeightsforToeplitz
@@ -69,7 +69,7 @@ def inputMapstoToeplitz(inputMaps: List[List[List[List[float]]]]) -> List[List[f
                 for i in range(R):
                     for j in range(S):
                         for k in range(C):
-                            temp[R*S*k + innerCtr] = inputMaps[n][k][U*x + i][U*y + j][0]
+                            temp[R*S*k + innerCtr] = inputMaps[n][k][U*x + i][U*y + j]
                         innerCtr += 1
                 inputMapsforToeplitz[outerCtr] = temp
                 outerCtr += 1
@@ -95,7 +95,7 @@ def convertOutputMaps(outputMapsNaive: List[List[List[List[float]]]]) -> List[Li
         for n in range(N):
             for y in range(E):
                 for x in range(F):
-                    temp[ctr] = outputMapsNaive[n][m][x][y][0]
+                    temp[ctr] = outputMapsNaive[n][m][x][y]
                     ctr += 1
         convertedOutputMaps[m] = temp
     return convertedOutputMaps
